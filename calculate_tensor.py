@@ -3,26 +3,19 @@ from sympy import latex
 
 
 def wyswietl_tensory(gdd, Gammaudd, Riemdddd, Ricci, Scalar_Curvature, Gud, n, T):
-    # -- już masz: wyświetlanie T, G, skalar krzywizny, itd. --
-    # (fragmenty pomijam)
 
-    # ---------------------------------------------
-    # 1. WYŚWIETLANIE SYMBOLI CHRISTOFFELA Γ^σ_{μν}
-    # ---------------------------------------------
     print("\nSymbole Christoffela (Gamma^sigma_{mu nu}):")
     for sigma in range(n):
         for mu in range(n):
             for nu in range(n):
                 val = Gammaudd[sigma, mu, nu]
-                # Jeśli chcesz zobaczyć też 0, usuń warunek:
+                
                 if val != 0:
                     gamma_str = format_tensor_text("Γ", [sigma], [mu, nu])
                     print(f"{gamma_str} = {val}")
     print("")
 
-    # -----------------------------------------------------
-    # 2. WYŚWIETLANIE TENORA RIEMANNA (R^rho_{sigma mu nu})
-    # -----------------------------------------------------
+
     print("Tensor Riemanna (R^rho_{sigma mu nu}):")
     for rho in range(n):
         for sigma in range(n):
@@ -34,9 +27,7 @@ def wyswietl_tensory(gdd, Gammaudd, Riemdddd, Ricci, Scalar_Curvature, Gud, n, T
                         print(f"{r_str} = {val}")
     print("")
 
-    # ------------------------------------------------
-    # 3. WYŚWIETLANIE TENORA RICCI (R_{mu nu})
-    # ------------------------------------------------
+   
     print("Tensor Ricciego (R_{mu nu}):")
     for mu in range(n):
         for nu in range(n):
