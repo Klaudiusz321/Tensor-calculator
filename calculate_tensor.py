@@ -28,6 +28,15 @@ def generate_index_christoffel(n):
             for c in range(b, n):
                 index.append((a, b, c))
     return index
+def write_einstein_components_latex(G, n):
+    print(r"Non-zero Einstein Tensor Components ($G_{ij}$):")
+    for i in range(n):
+        for j in range(i, n):
+            val = custom_simplify(G[i, j])  # Simplify each component
+            if val != 0:
+                expr_latex = latex(val)  # Convert to LaTeX
+                print(rf"G_{{{i}{j}}} &= {expr_latex} \\\\")
+    print(r"\end{align*}")
 
 
 
@@ -41,10 +50,10 @@ def lower_indices(Riemann, g, n):
     return R_abcd
 
 def write_einstein_components(G, n):
-    print("Non zero einstein tensor components (G_ij):")
+    print("Non zero einstein tensor components (G^_ij):")
     for i in range(n):
         for j in range(i,n):
-            val = G[i,j]
+            val = custom_simplify(G[i,j])
             if val !=0:
                 print(f"G{{{i}{j}}} = {val}")
     print("")
@@ -53,7 +62,7 @@ def write_metric_components(g, n):
     print("non zero metric tensor (g_{ij}):")
     for i in range(n):
         for j in range(i, n):
-            val = g[i, j]
+            val = custom_simplify(g[i, j])
             if val != 0:
                 print(f"g_{i}{j} = {val}")
     print("")
@@ -63,7 +72,7 @@ def write_christoffel_symbols(Gamma, n):
     ch_index = generate_index_christoffel(n)
     for (a, b, c) in ch_index:
         val = Gamma[a][b][c]
-        if val != 0:
+        if custom_simplify(val) != 0:
             print(f"Γ^{a}_{{{b}{c}}} = {val}")
     print("")
 
@@ -87,24 +96,20 @@ def write_ricci_components(Ricci, n):
 
 
 
-
 def custom_simplify(expr):
-    from sympy import simplify, factor, expand, expand_trig, expand_log, trigsimp
-
+    from sympy import simplify, factor, expand, trigsimp, cancel, ratsimp
+    
     expr_simpl = expand(expr)
-    expr_simpl = expand_trig(expr_simpl)
-    expr_simpl = expand_log(expr_simpl)
-
-
     expr_simpl = trigsimp(expr_simpl)
     expr_simpl = factor(expr_simpl)
     expr_simpl = simplify(expr_simpl)
-
+    expr_simpl = cancel(expr_simpl)
+    expr_simpl = ratsimp(expr_simpl)
+    
     return expr_simpl
 
 
 def wczytaj_metryke(filename):
-
     symbol_assumptions = {
         'a':    dict(real=True, positive=True),
         'tau':  dict(real=True),
@@ -114,7 +119,6 @@ def wczytaj_metryke(filename):
     }
 
     def create_symbol(sym_name):
-
         if sym_name in symbol_assumptions:
             return sp.Symbol(sym_name, **symbol_assumptions[sym_name])
         else:
@@ -134,29 +138,28 @@ def wczytaj_metryke(filename):
                 if ';' in line:
                     wsp_, prm_ = line.split(';')
                     wsp_strs = [sym.strip() for sym in wsp_.split(',') if sym.strip()]
-                    # Tworzymy symbole z założeniami
                     wspolrzedne = [create_symbol(s) for s in wsp_strs]
 
                     prm_ = prm_.strip()
                     if prm_:
                         par_strs = [sym.strip() for sym in prm_.split(',') if sym.strip()]
                         parametry = [create_symbol(s) for s in par_strs]
-
                 else:
                     dat = line.split(maxsplit=2)
                     if len(dat) == 3:
                         try:
                             i, j, expr = int(dat[0]), int(dat[1]), dat[2]
-                            metryka[(i, j)] = sp.sympify(expr, locals={"Symbol": create_symbol})
+                            # Tworzymy słownik symboli
+                            symbols_dict = {str(sym): sym for sym in wspolrzedne + parametry}
+                            metryka[(i, j)] = sp.sympify(expr, locals=symbols_dict)
                         except ValueError:
-                            print(f"Error: Uncorrect data in line: {line}")
+                            print(f"Error: Incorrect data in line: {line}")
     except FileNotFoundError:
-        print(f"Błąd: File has not been founded: {filename}")
+        print(f"Błąd: File has not been found: {filename}")
     except Exception as e:
-        print(f"unecpected error: {e}")
+        print(f"Unexpected error: {e}")
 
     return wspolrzedne, parametry, metryka
-
 
 
 def oblicz_tensory(wspolrzedne, metryka):
@@ -200,43 +203,26 @@ def oblicz_tensory(wspolrzedne, metryka):
     Ricci = sp.zeros(n, n)
     for mu in range(n):
         for nu in range(n):
-            Ricci[mu, nu] = sum(Riemann[rho][mu][rho][nu] for rho in range(n))
+            Ricci[mu, nu] = custom_simplify(sum(Riemann[rho][mu][rho][nu] for rho in range(n)))
             Ricci[mu, nu] = custom_simplify(Ricci[mu, nu])
 
 
-    Scalar_Curvature = sum(g_inv[mu, nu] * Ricci[mu, nu] for mu in range(n) for nu in range(n))
+    Scalar_Curvature = custom_simplify(sum(g_inv[mu, nu] * Ricci[mu, nu] for mu in range(n) for nu in range(n)))
     Scalar_Curvature = custom_simplify(Scalar_Curvature)
 
     return g, Gamma, R_abcd, Ricci, Scalar_Curvature
 
 
-# def write_full_riemann_components_latex(R_abcd, n):
-#     riemann_index = generate_index_riemann(n)
-#     print(r"\begin{align*}")
-#     for (a, b, c, d) in riemann_index:
-#         val = R_abcd[a][b][c][d]
-#         if val != 0:
-#             expr_latex = latex(val)
-#             print(rf"R_{{{a}{b}{c}{d}}} &= {expr_latex} \\\\")
-#     print(r"\end{align*}")
 
 def compute_einstein_tensor(Ricci, Scalar_Curvature, g, n):
     G = sp.zeros(n,n)
     for mu in range(n):
         for nu in range(n):
-            G[mu, nu] = Ricci[mu, nu] - sp.Rational(1, 2)*g[mu, nu]* Scalar_Curvature
+            G[mu, nu] = custom_simplify(Ricci[mu, nu] - sp.Rational(1, 2)*g[mu, nu]* Scalar_Curvature)
             G[mu, nu] = custom_simplify(G[mu, nu])
     return G
 
-# def write_ricci_components_latex(Ricci, n):
-#     ricci_index = generate_index_ricci(n)
-#     print(r"\begin{align*}")
-#     for (i, j) in ricci_index:
-#         val = Ricci[i, j]
-#         if val != 0:
-#             expr_latex = latex(val)
-#             print(rf"R_{{{i}{j}}} &= {expr_latex} \\\\")
-#     print(r"\end{align*}")
+
 
 def write_christoffel_symbols_latex(Gamma, n):
     ch_index = generate_index_christoffel(n)
@@ -267,21 +253,6 @@ def wyswietl_tensory(g, Gamma, R_abcd, Ricci, Scalar_Curvature,G, n):
     print("Scalar curature R:")
     sp.pprint(Scalar_Curvature)
     print("")
-
-    # print("\n--- LaTeX Code for Christoffel Symbols ---")
-    # write_christoffel_symbols_latex(Gamma, n)
-
-    # print("\n--- LaTeX Code for Riemann Tensor ---")
-    # write_full_riemann_components_latex(R_abcd, n)
-    #
-    # print("\n--- LaTeX Code for Ricci Tensor ---")
-    # write_ricci_components_latex(Ricci, n)
-
-    # print("\n--- LaTeX Code for Scalar Curvature ---")
-    # write_scalar_curvature_latex(Scalar_Curvature)
-    # print("")
-
-
 
 
 
