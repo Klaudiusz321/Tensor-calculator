@@ -119,6 +119,15 @@ def generate_index_christoffel(n):
             for c in range(n):
                 index.append((a, b, c))
     return index
+def write_einstein_components_latex(G, n):
+    print(r"Non-zero Einstein Tensor Components ($G_{ij}$):")
+    for i in range(n):
+        for j in range(i, n):
+            val = custom_simplify(G[i, j])  # Simplify each component
+            if val != 0:
+                expr_latex = latex(val)  # Convert to LaTeX
+                print(rf"G_{{{i}{j}}} &= {expr_latex} \\\\")
+    print(r"\end{align*}")
 
 # Funkcja do obniżania indeksów Riemanna (nieużywana w tym programie)
 def lower_indices(Riemann, g, n):
@@ -130,28 +139,71 @@ def lower_indices(Riemann, g, n):
                     R_abcd[a][b][c][d] = sum(g[a, i] * Riemann[i][b][c][d] for i in range(n))
     return R_abcd
 
-# Funkcja do tworzenia tensorów energii-pędu
-def energy_momentum_tensor(gdd, A, rho, p, n):
-    T = sp.MutableDenseNDimArray.zeros(n, n)
-    # Zakładamy, że czteroprędność ma tylko pierwszy składnik niezerowy
-    T[0, 0] = rho
-    for i in range(1, n):
-        T[i, i] = p
-    return T
-
-# Funkcja do obliczania tensora Einsteina
-def compute_einstein_tensor(Ricci, Scalar_Curvature, g_inv, n):
-    Gud = sp.MutableDenseNDimArray.zeros(n, n)
+def write_einstein_components(G, n):
+    print("Non zero einstein tensor components (G_ij):")
     for i in range(n):
-        for j in range(n):
-            Gud[i, j] = Ricci[i, j] - (sp.Rational(1, 2) * g_inv[i, j] * Scalar_Curvature)
-            Gud[i, j] = Gud[i, j].simplify()
-    return Gud
+        for j in range(i,n):
+            val = G[i,j]
+            if val !=0:
+                print(f"G{{{i}{j}}} = {val}")
+    print("")
 
-# Funkcja do wczytywania metryki z pliku
+def write_metric_components(g, n):
+    print("non zero metric tensor (g_{ij}):")
+    for i in range(n):
+        for j in range(i, n):
+            val = g[i, j]
+            if val != 0:
+                print(f"g_{i}{j} = {val}")
+    print("")
+
+def write_christoffel_symbols(Gamma, n):
+    print("Non zero Christoffela (Γ^a_{bc}):")
+    ch_index = generate_index_christoffel(n)
+    for (a, b, c) in ch_index:
+        val = Gamma[a][b][c]
+        if val != 0:
+            print(f"Γ^{a}_{{{b}{c}}} = {val}")
+    print("")
+
+def write_full_riemann_components(R_abcd, n):
+    print("Non zero Riemann (R_{abcd}):")
+    riemann_index = generate_index_riemann(n)
+    for (a, b, c, d) in riemann_index:
+        val = R_abcd[a][b][c][d]
+        if val != 0:
+            print(f"R_{a}{b}{c}{d} = {val}")
+    print("")
+
+def write_ricci_components(Ricci, n):
+    print("Non zero Ricci (R_{ij}):")
+    ricci_index = generate_index_ricci(n)
+    for (i, j) in ricci_index:
+        val = Ricci[i, j]
+        if val != 0:
+            print(f"R_{{{i}{j}}} = {val}")
+    print("")
+
+
+
+
+def custom_simplify(expr):
+    from sympy import simplify, factor, expand, expand_trig, expand_log, trigsimp
+
+    expr_simpl = expand(expr)
+    expr_simpl = expand_trig(expr_simpl)
+    expr_simpl = expand_log(expr_simpl)
+
+
+    expr_simpl = trigsimp(expr_simpl)
+    expr_simpl = factor(expr_simpl)
+    expr_simpl = simplify(expr_simpl)
+
+    return expr_simpl
+
+
 def wczytaj_metryke(filename):
-    # Implementacja funkcji wczytującej metrykę z pliku
-    # Zakładamy, że plik zawiera linie w formacie: i j expr
+
     symbol_assumptions = {
         'a':    dict(real=True, positive=True),
         'psi':  dict(real=True),
@@ -186,13 +238,14 @@ def wczytaj_metryke(filename):
                     if prm_:
                         par_strs = [sym.strip() for sym in prm_.split(',') if sym.strip()]
                         parametry = [create_symbol(s) for s in par_strs]
-
                 else:
                     dat = line.split(maxsplit=2)
                     if len(dat) == 3:
                         try:
                             i, j, expr = int(dat[0]), int(dat[1]), dat[2]
-                            metryka[(i, j)] = sp.sympify(expr, locals={"Symbol": create_symbol})
+                            # Tworzymy słownik symboli
+                            symbols_dict = {str(sym): sym for sym in wspolrzedne + parametry}
+                            metryka[(i, j)] = sp.sympify(expr, locals=symbols_dict)
                         except ValueError:
                             print(f"Error: Incorrect data in line: {line}")
     except FileNotFoundError:
@@ -202,7 +255,8 @@ def wczytaj_metryke(filename):
 
     return wspolrzedne, parametry, metryka
 
-# Funkcja do obliczania tensorów
+
+
 def oblicz_tensory(wspolrzedne, metryka):
     n = len(wspolrzedne)
 
@@ -241,63 +295,93 @@ def oblicz_tensory(wspolrzedne, metryka):
     Ricci = sp.MutableDenseNDimArray.zeros(n, n)
     for mu in range(n):
         for nu in range(n):
-            Ricci[mu, nu] = sum(Riemdddd[rho, mu, rho, nu] for rho in range(n)).simplify()
-
-    # Obliczanie skalarnej krzywizny
-    Scalar_Curvature = sum(g_inv[mu, nu] * Ricci[mu, nu] for mu in range(n) for nu in range(n)).simplify()
-
-    # Definicja czteroprędności
-    # Zakładamy, że A = exp(-psi(chi))
-    A_expr = sp.exp(-psi)
-
-    # Obliczenie tensora energii-pędu
-    T = energy_momentum_tensor(gdd, A_expr, rho, p, n)
-
-    # Obliczenie tensora Einsteina
-    Gud = compute_einstein_tensor(Ricci, Scalar_Curvature, g_inv, n)
-
-    return gdd, Gammaudd, Riemdddd, Ricci, Scalar_Curvature, Gud, T
+            Ricci[mu, nu] = sum(Riemann[rho][mu][rho][nu] for rho in range(n))
+            Ricci[mu, nu] = custom_simplify(Ricci[mu, nu])
 
 
-# Funkcja do wczytywania metryki z pliku (ta sama co wcześniej)
-# [Została już zdefiniowana powyżej]
+    Scalar_Curvature = sum(g_inv[mu, nu] * Ricci[mu, nu] for mu in range(n) for nu in range(n))
+    Scalar_Curvature = custom_simplify(Scalar_Curvature)
 
-# Funkcja do wyświetlania tensorów
-def wyswietl_tensory(gdd, Gammaudd, Riemdddd, Ricci, Scalar_Curvature, Gud, n, T):
-    # Tekstowe Wyjścia
-    print("Tensor energii-pędu (T^i_j):")
-    for i in range(n):
-        for j in range(n):
-            val = T[i, j]
-            if val != 0:
-                tensor_str = format_tensor_text("T", [i], [j])
-                print(f"{tensor_str} = {val}")
-    print("")
+    return g, Gamma, R_abcd, Ricci, Scalar_Curvature
 
-    print("Tensor Einsteina (G^i_j):")
-    for i in range(n):
-        for j in range(n):
-            val = Gud[i, j]
-            if val != 0:
-                tensor_str = format_tensor_text("G", [i], [j])
-                print(f"{tensor_str} = {val}")
-    print("")
+
+# def write_full_riemann_components_latex(R_abcd, n):
+#     riemann_index = generate_index_riemann(n)
+#     print(r"\begin{align*}")
+#     for (a, b, c, d) in riemann_index:
+#         val = R_abcd[a][b][c][d]
+#         if val != 0:
+#             expr_latex = latex(val)
+#             print(rf"R_{{{a}{b}{c}{d}}} &= {expr_latex} \\\\")
+#     print(r"\end{align*}")
+
+def compute_einstein_tensor(Ricci, Scalar_Curvature, g, n):
+    G = sp.zeros(n,n)
+    for mu in range(n):
+        for nu in range(n):
+            G[mu, nu] = Ricci[mu, nu] - sp.Rational(1, 2)*g[mu, nu]* Scalar_Curvature
+            G[mu, nu] = custom_simplify(G[mu, nu])
+    return G
+
+# def write_ricci_components_latex(Ricci, n):
+#     ricci_index = generate_index_ricci(n)
+#     print(r"\begin{align*}")
+#     for (i, j) in ricci_index:
+#         val = Ricci[i, j]
+#         if val != 0:
+#             expr_latex = latex(val)
+#             print(rf"R_{{{i}{j}}} &= {expr_latex} \\\\")
+#     print(r"\end{align*}")
+
+def write_christoffel_symbols_latex(Gamma, n):
+    ch_index = generate_index_christoffel(n)
+    print(r"\begin{align*}")
+    for (a, b, c) in ch_index:
+        val = Gamma[a][b][c]
+        if val != 0:
+            expr_latex = latex(val)
+            print(rf"\Gamma^{{{a}}}_{{{b}{c}}} &= {expr_latex} \\\\")
+    print(r"\end{align*}")
+
+def write_scalar_curvature_latex(Scalar_Curvature):
+    scalar_latex = latex(Scalar_Curvature)
+    print(r"\begin{equation*}")
+    print(rf"R = {scalar_latex}")
+    print(r"\end{equation*}")
+
+
+
+
+def wyswietl_tensory(g, Gamma, R_abcd, Ricci, Scalar_Curvature,G, n):
+    write_metric_components(g, n)
+    write_christoffel_symbols(Gamma, n)
+    write_full_riemann_components(R_abcd, n)
+    write_ricci_components(Ricci, n)
+    write_einstein_components(G, n)
 
     print("Skalar krzywizny R:")
     sp.pprint(Scalar_Curvature)
     print("")
 
-    # Możesz dodać inne wyświetlenia tensorów według potrzeb
+    # print("\n--- LaTeX Code for Christoffel Symbols ---")
+    # write_christoffel_symbols_latex(Gamma, n)
 
-# Funkcja główna
-def main():
-    # Definicje stałych fizycznych (przykładowe wartości)
-    G_val, c_val, m_val, n0_val, beta_val = 6.67430e-11, 3e8, 1.0, 1.0, 0.1  # Jednostki SI
+    # print("\n--- LaTeX Code for Riemann Tensor ---")
+    # write_full_riemann_components_latex(R_abcd, n)
+    #
+    # print("\n--- LaTeX Code for Ricci Tensor ---")
+    # write_ricci_components_latex(Ricci, n)
 
-    # Ustalanie parametru długości a
-    a_val = (c_val**2) / (G_val * m_val * n0_val)
+    # print("\n--- LaTeX Code for Scalar Curvature ---")
+    # write_scalar_curvature_latex(Scalar_Curvature)
+    # print("")
 
-    # Ścieżka do pliku z metryką
+
+
+
+
+if __name__ == "__main__":
+
     filename = r"C:\Users\sorak\Desktop\metric.txt"
 
     # Wczytanie metryki
