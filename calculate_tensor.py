@@ -1,6 +1,4 @@
 import sympy as sp
-from sympy import latex
-
 
 
 
@@ -28,15 +26,7 @@ def generate_index_christoffel(n):
             for c in range(b, n):
                 index.append((a, b, c))
     return index
-def write_einstein_components_latex(G, n):
-    print(r"Non-zero Einstein Tensor Components ($G_{ij}$):")
-    for i in range(n):
-        for j in range(i, n):
-            val = custom_simplify(G[i, j])  # Simplify each component
-            if val != 0:
-                expr_latex = latex(val)  # Convert to LaTeX
-                print(rf"G_{{{i}{j}}} &= {expr_latex} \\\\")
-    print(r"\end{align*}")
+
 
 
 
@@ -215,30 +205,12 @@ def oblicz_tensory(wspolrzedne, metryka):
 
 
 def compute_einstein_tensor(Ricci, Scalar_Curvature, g, n):
-    G = sp.zeros(n,n)
+    G = sp.zeros(n, n)
     for mu in range(n):
         for nu in range(n):
-            G[mu, nu] = custom_simplify(Ricci[mu, nu] - sp.Rational(1, 2)*g[mu, nu]* Scalar_Curvature)
-            G[mu, nu] = custom_simplify(G[mu, nu])
+            G[mu, nu] = custom_simplify(Ricci[mu, nu] - sp.Rational(1, 2) * g[mu, nu] * Scalar_Curvature)
     return G
 
-
-
-def write_christoffel_symbols_latex(Gamma, n):
-    ch_index = generate_index_christoffel(n)
-    print(r"\begin{align*}")
-    for (a, b, c) in ch_index:
-        val = Gamma[a][b][c]
-        if val != 0:
-            expr_latex = latex(val)
-            print(rf"\Gamma^{{{a}}}_{{{b}{c}}} &= {expr_latex} \\\\")
-    print(r"\end{align*}")
-
-def write_scalar_curvature_latex(Scalar_Curvature):
-    scalar_latex = latex(Scalar_Curvature)
-    print(r"\begin{equation*}")
-    print(rf"R = {scalar_latex}")
-    print(r"\end{equation*}")
 
 
 
@@ -268,8 +240,12 @@ if __name__ == "__main__":
     print("")
 
 
-    if wspolrzedne and metryka:
-        g, Gamma, R_abcd, Ricci, Scalar_Curvature,   = oblicz_tensory(wspolrzedne, metryka)
-        G = compute_einstein_tensor(Ricci, Scalar_Curvature, g, len(wspolrzedne))
+if wspolrzedne and metryka:
+    g, Gamma, R_abcd, Ricci, Scalar_Curvature = oblicz_tensory(wspolrzedne, metryka)
+    G = compute_einstein_tensor(Ricci, Scalar_Curvature, g, len(wspolrzedne))
+    
+    
+  
+    
+    wyswietl_tensory(g, Gamma, R_abcd, Ricci, Scalar_Curvature, G, len(wspolrzedne))
 
-        wyswietl_tensory(g, Gamma, R_abcd, Ricci, Scalar_Curvature,G, len(wspolrzedne))
