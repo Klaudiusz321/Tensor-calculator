@@ -1,8 +1,4 @@
 import sympy as sp
-from sympy import latex
-
-
-
 
 def generate_index_riemann(n):
     index = []
@@ -10,7 +6,7 @@ def generate_index_riemann(n):
         for b in range(a, n):
             for c in range(n):
                 for d in range(c, n):
-                    if (a*n + b) <= (c*n + d):
+                    if (a * n + b) <= (c * n + d):
                         index.append((a, b, c, d))
     return index
 
@@ -28,17 +24,6 @@ def generate_index_christoffel(n):
             for c in range(b, n):
                 index.append((a, b, c))
     return index
-def write_einstein_components_latex(G, n):
-    print(r"Non-zero Einstein Tensor Components ($G_{ij}$):")
-    for i in range(n):
-        for j in range(i, n):
-            val = custom_simplify(G[i, j])  # Simplify each component
-            if val != 0:
-                expr_latex = latex(val)  # Convert to LaTeX
-                print(rf"G_{{{i}{j}}} &= {expr_latex} \\\\")
-    print(r"\end{align*}")
-
-
 
 def lower_indices(Riemann, g, n):
     R_abcd = [[[[0 for _ in range(n)] for _ in range(n)] for _ in range(n)] for _ in range(n)]
@@ -49,17 +34,25 @@ def lower_indices(Riemann, g, n):
                     R_abcd[a][b][c][d] = sum(g[a, i] * Riemann[i][b][c][d] for i in range(n))
     return R_abcd
 
-def write_einstein_components(G, n):
-    print("Non zero einstein tensor components (G^_ij):")
+def write_einstein_components(G_upper, G_lower, n):
+    print("Niezerowe składowe tensora Einsteina (G^i_j):")
     for i in range(n):
-        for j in range(i,n):
-            val = custom_simplify(G[i,j])
-            if val !=0:
-                print(f"G{{{i}{j}}} = {val}")
+        for j in range(n):
+            val = custom_simplify(G_upper[i, j])
+            if val != 0:
+                print(f"G^{{{i}}}_{{{j}}} = {val}")
+    print("")
+    
+    print("Niezerowe składowe tensora Einsteina (G_ij):")
+    for i in range(n):
+        for j in range(n):
+            val = custom_simplify(G_lower[i, j])
+            if val != 0:
+                print(f"G_{{{i}{j}}} = {val}")
     print("")
 
 def write_metric_components(g, n):
-    print("non zero metric tensor (g_{ij}):")
+    print("Niezerowe składowe metryki (g_{ij}):")
     for i in range(n):
         for j in range(i, n):
             val = custom_simplify(g[i, j])
@@ -68,7 +61,7 @@ def write_metric_components(g, n):
     print("")
 
 def write_christoffel_symbols(Gamma, n):
-    print("Non zero Christoffela (Γ^a_{bc}):")
+    print("Niezerowe symbole Christoffela (Γ^a_{bc}):")
     ch_index = generate_index_christoffel(n)
     for (a, b, c) in ch_index:
         val = Gamma[a][b][c]
@@ -77,7 +70,7 @@ def write_christoffel_symbols(Gamma, n):
     print("")
 
 def write_full_riemann_components(R_abcd, n):
-    print("Non zero Riemann (R_{abcd}):")
+    print("Niezerowe komponenty tensora Riemanna (R_{abcd}):")
     riemann_index = generate_index_riemann(n)
     for (a, b, c, d) in riemann_index:
         val = R_abcd[a][b][c][d]
@@ -86,15 +79,13 @@ def write_full_riemann_components(R_abcd, n):
     print("")
 
 def write_ricci_components(Ricci, n):
-    print("Non zero Ricci (R_{ij}):")
+    print("Niezerowe komponenty tensora Ricciego (R_{ij}):")
     ricci_index = generate_index_ricci(n)
     for (i, j) in ricci_index:
         val = Ricci[i, j]
         if val != 0:
             print(f"R_{{{i}{j}}} = {val}")
     print("")
-
-
 
 def custom_simplify(expr):
     from sympy import simplify, factor, expand, trigsimp, cancel, ratsimp
@@ -107,7 +98,6 @@ def custom_simplify(expr):
     expr_simpl = ratsimp(expr_simpl)
     
     return expr_simpl
-
 
 def wczytaj_metryke(filename):
     symbol_assumptions = {
@@ -161,14 +151,11 @@ def wczytaj_metryke(filename):
 
     return wspolrzedne, parametry, metryka
 
-
 def oblicz_tensory(wspolrzedne, metryka):
     n = len(wspolrzedne)
 
-
     g = sp.Matrix(n, n, lambda i, j: metryka.get((i, j), metryka.get((j, i), 0)))
     g_inv = g.inv()
-
 
     Gamma = [[[0 for _ in range(n)] for _ in range(n)] for _ in range(n)]
     for sigma in range(n):
@@ -181,7 +168,6 @@ def oblicz_tensory(wspolrzedne, metryka):
                     partial_lam = sp.diff(g[mu, nu], wspolrzedne[lam])
                     Gamma_sum += g_inv[sigma, lam] * (partial_mu + partial_nu - partial_lam)
                 Gamma[sigma][mu][nu] = custom_simplify(sp.Rational(1, 2) * Gamma_sum)
-
 
     Riemann = [[[[0 for _ in range(n)] for _ in range(n)] for _ in range(n)] for _ in range(n)]
     for rho in range(n):
@@ -196,9 +182,7 @@ def oblicz_tensory(wspolrzedne, metryka):
                                      - Gamma[rho][nu][lam] * Gamma[lam][mu][sigma])
                     Riemann[rho][sigma][mu][nu] = custom_simplify(term1 - term2 + sum_term)
 
-
     R_abcd = lower_indices(Riemann, g, n)
-
 
     Ricci = sp.zeros(n, n)
     for mu in range(n):
@@ -206,45 +190,44 @@ def oblicz_tensory(wspolrzedne, metryka):
             Ricci[mu, nu] = custom_simplify(sum(Riemann[rho][mu][rho][nu] for rho in range(n)))
             Ricci[mu, nu] = custom_simplify(Ricci[mu, nu])
 
-
     Scalar_Curvature = custom_simplify(sum(g_inv[mu, nu] * Ricci[mu, nu] for mu in range(n) for nu in range(n)))
     Scalar_Curvature = custom_simplify(Scalar_Curvature)
 
     return g, Gamma, R_abcd, Ricci, Scalar_Curvature
 
+def compute_einstein_tensor(Ricci, Scalar_Curvature, g, g_inv, n):
+    G_lower = sp.zeros(n, n)  # G_{ij}
+    G_upper = sp.zeros(n, n)  # G^i_j
 
-
-def compute_einstein_tensor(Ricci, Scalar_Curvature, g, n):
-    G = sp.zeros(n,n)
+    # Oblicz G_{ij} = R_{ij} - 1/2 g_{ij} R
     for mu in range(n):
         for nu in range(n):
-            G[mu, nu] = custom_simplify(Ricci[mu, nu] - sp.Rational(1, 2)*g[mu, nu]* Scalar_Curvature)
-            G[mu, nu] = custom_simplify(G[mu, nu])
-    return G
+            G_lower[mu, nu] = custom_simplify(Ricci[mu, nu] - sp.Rational(1, 2) * g[mu, nu] * Scalar_Curvature)
 
+    # Oblicz G^i_j = g^{ik} G_{kj}
+    for mu in range(n):
+        for nu in range(n):
+            sum_term = 0
+            for alpha in range(n):
+                sum_term += g_inv[mu, alpha] * G_lower[alpha, nu]
+            G_upper[mu, nu] = custom_simplify(sum_term)
 
+    return G_upper, G_lower
 
-
-
-
-
-def wyswietl_tensory(g, Gamma, R_abcd, Ricci, Scalar_Curvature,G, n):
+def wyswietl_tensory(g, Gamma, R_abcd, Ricci, Scalar_Curvature, G_upper, G_lower, n):
     write_metric_components(g, n)
     write_christoffel_symbols(Gamma, n)
     write_full_riemann_components(R_abcd, n)
     write_ricci_components(Ricci, n)
-    write_einstein_components(G, n)
+    write_einstein_components(G_upper, G_lower, n)
 
-    print("Scalar curature R:")
+    print("Skalarowa krzywizna R:")
     sp.pprint(Scalar_Curvature)
     print("")
-
-
 
 if __name__ == "__main__":
 
     filename = r"C:\Users\sorak\Desktop\metric.txt"
-
 
     wspolrzedne, parametry, metryka = wczytaj_metryke(filename)
     print("Coordinates:", wspolrzedne)
@@ -252,9 +235,18 @@ if __name__ == "__main__":
     print("Metric (non zero elements):", metryka)
     print("")
 
-
     if wspolrzedne and metryka:
-        g, Gamma, R_abcd, Ricci, Scalar_Curvature,   = oblicz_tensory(wspolrzedne, metryka)
-        G = compute_einstein_tensor(Ricci, Scalar_Curvature, g, len(wspolrzedne))
-
-        wyswietl_tensory(g, Gamma, R_abcd, Ricci, Scalar_Curvature,G, len(wspolrzedne))
+        g, Gamma, R_abcd, Ricci, Scalar_Curvature = oblicz_tensory(wspolrzedne, metryka)
+        
+        # Oblicz odwrotną metrykę
+        try:
+            g_inv = g.inv()
+        except Exception as e:
+            print("Błąd przy obliczaniu odwrotnej metryki:", e)
+            exit(1)
+        
+        # Oblicz tensor Einsteina
+        G_upper, G_lower = compute_einstein_tensor(Ricci, Scalar_Curvature, g, g_inv, len(wspolrzedne))
+        
+        # Wyświetl wszystkie tensory
+        wyswietl_tensory(g, Gamma, R_abcd, Ricci, Scalar_Curvature, G_upper, G_lower, len(wspolrzedne))
