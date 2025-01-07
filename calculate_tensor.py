@@ -35,7 +35,7 @@ def lower_indices(Riemann, g, n):
     return R_abcd
 
 def write_einstein_components(G_upper, G_lower, n):
-    print("Niezerowe składowe tensora Einsteina (G^i_j):")
+    print("Non zero Einsteina tensor (G^i_j):")
     for i in range(n):
         for j in range(n):
             val = custom_simplify(G_upper[i, j])
