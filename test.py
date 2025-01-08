@@ -15,7 +15,7 @@ R = sp.Function('R')(x)
 U = sp.Function('U')(x)
 
 
-# Correcting the function and variable names based on the new coordinate system
+
 def e_tau(u, a):
     return sp.Matrix([sp.exp(-u) / a, 0, 0, 0])
 
@@ -28,7 +28,6 @@ def e_theta(a, chi):
 def e_zeta(w, a):
     return sp.Matrix([0, 0, 0, sp.exp(w) / a])
 
-# Assigning the corrected basis vectors
 etau = e_tau(u, a)
 echi = e_chi(u, v, a)
 etheta = e_theta(a, chi)
@@ -46,12 +45,7 @@ g = sp.Matrix([[-1, 0, 0, 0],
                [0, 0, 1, 0],
                [0, 0, 0, 1]])
 
-matrix_trace = sp.Matrix([
-    [1, 0, 0, 0],
-    [0, 1, 0, 0],
-    [0, 0, 1, 0],
-    [0, 0, 0, 1]
-])
+
 
 Vd = g * Vu
 print("\nKowariantne składowe Vd:", Vd)
@@ -78,28 +72,16 @@ sp.pprint(Vd_Tud_Vu[0])
 rho_0 = rho_0 * c**2
 G = (kappa * c**4) / (8 * sp.pi * a**2 * rho_0)
 
-Gud = g - (8 * sp.pi * G / c**4) * T_ud
+G_ud = g - (8 * sp.pi * G / c**4) * T_ud
 
-print("rownania einsteina",Gud)
+Gud_simplified = G_ud.expand()
 
-
-U_prime = sp.diff(U, x)
-U_double_prime = sp.diff(U_prime, x)
-
-expression = P * U_prime + R * U_double_prime + sp.diff(P, x)
+print("\nTensor metryczny G^{ud}:")
 
 
-print(expression)
+sp.pprint(G_ud)
 
-EQud = sp.MatrixSymbol('EQud', 4, 4)
+G_up = G_ud * g.inv()
 
-
-EQ_tau = (g * etau).T * EQud * etau
-
-EQ_chi = (g * echi).T * EQud * echi
-
-EQ_theta = (g * etheta).T * EQud * etheta
-
-EQ_zeta = (g * ezeta).T * EQud * ezeta
-
-print(EQ_tau.simplify(), EQ_chi.simplify(), EQ_theta.simplify(), EQ_zeta.simplify())
+print("\nTensor metryczny G^{up}:")
+sp.pprint(G_up)
