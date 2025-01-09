@@ -35,12 +35,16 @@ def lower_indices(Riemann, g, n):
     return R_abcd
 
 def write_einstein_components(G_upper, G_lower, n):
-    print("Non zero Einsteina tensor (G^i_j):")
+    print("Niezerowe Einsteina tensor (G^i_j):")
     for i in range(n):
         for j in range(n):
             val = custom_simplify(G_upper[i, j])
             if val != 0:
-                print(f"G^{{{i}}}_{{{j}}} = {val}")
+                # Konwertujemy wyrażenie SymPy do LaTeX
+                latex_str = sp.latex(val)
+                # Przetwarzamy LaTeX bez użycia 're'
+                cleaned_latex = process_latex(latex_str)
+                print(f"G^{{{i}}}_{{{j}}} = ${cleaned_latex}$")
     print("")
     
     print("Niezerowe składowe tensora Einsteina (G_ij):")
@@ -48,7 +52,11 @@ def write_einstein_components(G_upper, G_lower, n):
         for j in range(n):
             val = custom_simplify(G_lower[i, j])
             if val != 0:
-                print(f"G_{{{i}{j}}} = {val}")
+                # Konwertujemy wyrażenie SymPy do LaTeX
+                latex_str = sp.latex(val)
+                # Przetwarzamy LaTeX bez użycia 're'
+                cleaned_latex = process_latex(latex_str)
+                print(f"G_{{{i}{j}}} = ${cleaned_latex}$")
     print("")
 
 def write_metric_components(g, n):
@@ -66,7 +74,11 @@ def write_christoffel_symbols(Gamma, n):
     for (a, b, c) in ch_index:
         val = Gamma[a][b][c]
         if custom_simplify(val) != 0:
-            print(f"Γ^{a}_{{{b}{c}}} = {val}")
+            # Konwertujemy wyrażenie SymPy do LaTeX
+            latex_str = sp.latex(val)
+            # Przetwarzamy LaTeX bez użycia 're'
+            cleaned_latex = process_latex(latex_str)
+            print(f"\\Gamma^{{{a}}}_{{{b}{c}}} = ${cleaned_latex}$")
     print("")
 
 def write_full_riemann_components(R_abcd, n):
@@ -75,7 +87,11 @@ def write_full_riemann_components(R_abcd, n):
     for (a, b, c, d) in riemann_index:
         val = R_abcd[a][b][c][d]
         if val != 0:
-            print(f"R_{a}{b}{c}{d} = {val}")
+            # Konwertujemy wyrażenie SymPy do LaTeX
+            latex_str = sp.latex(val)
+            # Przetwarzamy LaTeX bez użycia 're'
+            cleaned_latex = process_latex(latex_str)
+            print(f"R_{{{a}{b}{c}{d}}} = ${cleaned_latex}$")
     print("")
 
 def write_ricci_components(Ricci, n):
@@ -84,8 +100,13 @@ def write_ricci_components(Ricci, n):
     for (i, j) in ricci_index:
         val = Ricci[i, j]
         if val != 0:
-            print(f"R_{{{i}{j}}} = {val}")
+            # Konwertujemy wyrażenie SymPy do LaTeX
+            latex_str = sp.latex(val)
+            # Przetwarzamy LaTeX bez użycia 're'
+            cleaned_latex = process_latex(latex_str)
+            print(f"R_{{{i}{j}}} = ${cleaned_latex}$")
     print("")
+
 
 def custom_simplify(expr):
     from sympy import simplify, factor, expand, trigsimp, cancel, ratsimp
@@ -98,6 +119,84 @@ def custom_simplify(expr):
     expr_simpl = ratsimp(expr_simpl)
     
     return expr_simpl
+def process_latex(latex_str):
+    """
+    Przetwarza ciąg LaTeX, wykonując określone zamiany:
+    1. Zastępuje f(chi) na f
+    2. Zastępuje Derivative(f, chi) na f'
+    3. Można dodać więcej zamian według potrzeb
+    """
+    # Zamiana f(\chi) lub f(chi) na f
+    # Zakładamy, że nazwa funkcji składa się z liter
+    # i jest bez spacji między nazwą a nawiasem
+    def remove_function_argument(latex):
+        result = ""
+        i = 0
+        while i < len(latex):
+            if latex[i].isalpha():
+                start = i
+                while i < len(latex) and latex[i].isalpha():
+                    i += 1
+                func_name = latex[start:i]
+                # Sprawdzamy, czy następuje '('
+                if i < len(latex) and latex[i] == '(':
+                    i += 1  # Pomijamy '('
+                    arg_start = i
+                    paren_count = 1
+                    while i < len(latex) and paren_count > 0:
+                        if latex[i] == '(':
+                            paren_count += 1
+                        elif latex[i] == ')':
+                            paren_count -= 1
+                        i += 1
+                    arg = latex[arg_start:i-1].strip()
+                    if arg in ['\\chi', 'chi']:
+                        # Pomijamy argument
+                        result += func_name
+                    else:
+                        # Zostawiamy funkcję z innym argumentem
+                        result += f"{func_name}({arg})"
+                else:
+                    # Nie jest to funkcja z argumentem
+                    result += func_name
+            else:
+                # Kopiujemy pozostałe znaki
+                result += latex[i]
+                i += 1
+        return result
+
+    # Zamiana \frac{d}{d \chi} f na f'
+    def replace_derivative(latex):
+        search_str = "\\frac{d}{d \\chi}"
+        while search_str in latex:
+            index = latex.find(search_str)
+            # Zakładamy, że po \frac{d}{d \chi} następuje spacja i zmienna
+            after = latex[index + len(search_str):]
+            # Znajdujemy koniec nazwy zmiennej
+            var_end = index + len(search_str)
+            while var_end < len(latex) and (latex[var_end].isalpha() or latex[var_end] == '\\'):
+                var_end += 1
+            var = latex[index + len(search_str):var_end].strip()
+            # Jeśli zmienna zaczyna się od '\', to jest to symbol LaTeX, np. \phi
+            if var.startswith('\\'):
+                var_name = ""
+                j = 0
+                while j < len(var) and (var[j].isalpha() or var[j] == '\\'):
+                    var_name += var[j]
+                    j += 1
+                var_replaced = f"{var_name}'"
+            else:
+                var_replaced = f"{var}'"
+            # Zamieniamy \frac{d}{d \chi} f na f'
+            latex = latex[:index] + var_replaced + latex[var_end:]
+        return latex
+
+    # Najpierw usuwamy argumenty funkcji
+    latex_str = remove_function_argument(latex_str)
+    # Następnie zamieniamy pochodne
+    latex_str = replace_derivative(latex_str)
+
+    return latex_str
 
 def wczytaj_metryke(filename):
     symbol_assumptions = {
@@ -224,6 +323,7 @@ def wyswietl_tensory(g, Gamma, R_abcd, Ricci, Scalar_Curvature, G_upper, G_lower
     print("Skalarowa krzywizna R:")
     sp.pprint(Scalar_Curvature)
     print("")
+
 
 if __name__ == "__main__":
 
