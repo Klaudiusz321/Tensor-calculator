@@ -34,6 +34,18 @@ def lower_indices(Riemann, g, n):
                     R_abcd[a][b][c][d] = sum(g[a, i] * Riemann[i][b][c][d] for i in range(n))
     return R_abcd
 
+def write_scalar_curvatre(scalar_curvature, n):
+   
+    # Konwertuj wyrażenie SymPy do LaTeX
+    latex_str = sp.latex(scalar_curvature)
+    
+    # Przetwarzaj LaTeX bez użycia 're'
+    cleaned_latex = process_latex(latex_str)
+    
+    print("Skalarowa krzywizna R:")
+    print(f"$R = {cleaned_latex}$")
+    print("")
+
 def write_einstein_components(G_upper, G_lower, n):
     print("Niezerowe Einsteina tensor (G^i_j):")
     for i in range(n):
@@ -120,15 +132,7 @@ def custom_simplify(expr):
     
     return expr_simpl
 def process_latex(latex_str):
-    """
-    Przetwarza ciąg LaTeX, wykonując określone zamiany:
-    1. Zastępuje f(chi) na f
-    2. Zastępuje Derivative(f, chi) na f'
-    3. Można dodać więcej zamian według potrzeb
-    """
-    # Zamiana f(\chi) lub f(chi) na f
-    # Zakładamy, że nazwa funkcji składa się z liter
-    # i jest bez spacji między nazwą a nawiasem
+   
     def remove_function_argument(latex):
         result = ""
         i = 0
@@ -319,7 +323,7 @@ def wyswietl_tensory(g, Gamma, R_abcd, Ricci, Scalar_Curvature, G_upper, G_lower
     write_full_riemann_components(R_abcd, n)
     write_ricci_components(Ricci, n)
     write_einstein_components(G_upper, G_lower, n)
-
+    write_scalar_curvatre(Scalar_Curvature, n)
     print("Skalarowa krzywizna R:")
     sp.pprint(Scalar_Curvature)
     print("")
