@@ -126,15 +126,10 @@ sp.pprint(EQud_simplified)
 
 
 
-
-
 EQtau =  etau.T * g * EQud * etau
 EQchi = echi.T*g*H_ud*EQud*echi
 EQphi = ephi.T*g*H_ud*EQud*ephi
 EQzeta = ezeta.T*g*H_ud*EQud*ezeta
-
-
-
 
 
 sp.pprint(EQtau)

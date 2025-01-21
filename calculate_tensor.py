@@ -44,79 +44,91 @@ def write_scalar_curvatre(scalar_curvature, n):
     
     print("Skalarowa krzywizna R:")
     print(f"$R = {cleaned_latex}$")
+    print("Curvature sclar R:")
+    sp.pprint(scalar_curvature)
     print("")
 
 def write_einstein_components(G_upper, G_lower, n):
-    print("Niezerowe Einsteina tensor (G^i_j):")
+    print("Non-zero Einstein tensor components (textual format and LaTeX):")
+    
+    # G^i_j
     for i in range(n):
         for j in range(n):
             val = custom_simplify(G_upper[i, j])
             if val != 0:
-                # Konwertujemy wyrażenie SymPy do LaTeX
+                # Tekst
+                print(f"G^({i})_({j}) = {val}")
+                # LaTeX
                 latex_str = sp.latex(val)
-                # Przetwarzamy LaTeX bez użycia 're'
-                cleaned_latex = process_latex(latex_str)
-                print(f"G^{{{i}}}_{{{j}}} = ${cleaned_latex}$")
-    print("")
+                print(f"G^{{{i}}}_{{{j}}} = {latex_str}")
     
-    print("Niezerowe składowe tensora Einsteina (G_ij):")
+    print("\nNon-zero Einstein tensor components (G_ij):")
     for i in range(n):
         for j in range(n):
             val = custom_simplify(G_lower[i, j])
             if val != 0:
-                # Konwertujemy wyrażenie SymPy do LaTeX
+                # Tekst
+                print(f"G_({i}{j}) = {val}")
+                # LaTeX
                 latex_str = sp.latex(val)
-                # Przetwarzamy LaTeX bez użycia 're'
-                cleaned_latex = process_latex(latex_str)
-                print(f"G_{{{i}{j}}} = ${cleaned_latex}$")
-    print("")
+                print(f"G_{{{i}{j}}} = {latex_str}")
+
 
 def write_metric_components(g, n):
-    print("Niezerowe składowe metryki (g_{ij}):")
+    print("Metric tensor components (textual format and LaTeX):")
     for i in range(n):
         for j in range(i, n):
             val = custom_simplify(g[i, j])
             if val != 0:
-                print(f"g_{i}{j} = {val}")
-    print("")
+                # Tekst
+                print(f"g_({i}{j}) = {val}")
+                # LaTeX
+                latex_str = sp.latex(val)
+                print(f"g_{{{i}{j}}} = {latex_str}")
+
 
 def write_christoffel_symbols(Gamma, n):
-    print("Niezerowe symbole Christoffela (Γ^a_{bc}):")
+    print("Non-zero Christoffel symbols (textual format and LaTeX):")
     ch_index = generate_index_christoffel(n)
     for (a, b, c) in ch_index:
         val = Gamma[a][b][c]
-        if custom_simplify(val) != 0:
-            # Konwertujemy wyrażenie SymPy do LaTeX
-            latex_str = sp.latex(val)
-            # Przetwarzamy LaTeX bez użycia 're'
-            cleaned_latex = process_latex(latex_str)
-            print(f"\\Gamma^{{{a}}}_{{{b}{c}}} = ${cleaned_latex}$")
-    print("")
+        simplified_val = custom_simplify(val)
+        if simplified_val != 0:
+            # Wyświetl tekstowy format
+            print(f"Γ^({a})_({b}{c}) = {simplified_val}")
+            
+            # Generuj LaTeX
+            latex_str = sp.latex(simplified_val)
+            print(f"\\Gamma^{{{a}}}_{{{b}{c}}} = {latex_str}")
+
 
 def write_full_riemann_components(R_abcd, n):
-    print("Niezerowe komponenty tensora Riemanna (R_{abcd}):")
+    print("Non-zero components of the Riemann tensor (textual format and LaTeX):")
     riemann_index = generate_index_riemann(n)
     for (a, b, c, d) in riemann_index:
         val = R_abcd[a][b][c][d]
         if val != 0:
-            # Konwertujemy wyrażenie SymPy do LaTeX
-            latex_str = sp.latex(val)
-            # Przetwarzamy LaTeX bez użycia 're'
-            cleaned_latex = process_latex(latex_str)
-            print(f"R_{{{a}{b}{c}{d}}} = ${cleaned_latex}$")
+            # Tekstowy format
+            print(f"R_({a}{b}{c}{d}) = {val}")
+            
+            # Generowanie LaTeX
+            latex_val = sp.latex(val)
+            print(f"R_{{{a}{b}{c}{d}}} = {latex_val}")
     print("")
 
+
 def write_ricci_components(Ricci, n):
-    print("Niezerowe komponenty tensora Ricciego (R_{ij}):")
+    print("Non-zero components of the Ricci tensor (textual format and LaTeX):")
     ricci_index = generate_index_ricci(n)
     for (i, j) in ricci_index:
         val = Ricci[i, j]
         if val != 0:
-            # Konwertujemy wyrażenie SymPy do LaTeX
-            latex_str = sp.latex(val)
-            # Przetwarzamy LaTeX bez użycia 're'
-            cleaned_latex = process_latex(latex_str)
-            print(f"R_{{{i}{j}}} = ${cleaned_latex}$")
+            # Tekstowy format
+            print(f"R_({i}{j}) = {val}")
+            
+            # Generowanie LaTeX
+            latex_val = sp.latex(val)
+            print(f"R_{{{i}{j}}} = {latex_val}")
     print("")
 
 
@@ -142,9 +154,9 @@ def process_latex(latex_str):
                 while i < len(latex) and latex[i].isalpha():
                     i += 1
                 func_name = latex[start:i]
-                # Sprawdzamy, czy następuje '('
+                
                 if i < len(latex) and latex[i] == '(':
-                    i += 1  # Pomijamy '('
+                    i += 1  
                     arg_start = i
                     paren_count = 1
                     while i < len(latex) and paren_count > 0:
@@ -155,33 +167,33 @@ def process_latex(latex_str):
                         i += 1
                     arg = latex[arg_start:i-1].strip()
                     if arg in ['\\chi', 'chi']:
-                        # Pomijamy argument
+                       
                         result += func_name
                     else:
-                        # Zostawiamy funkcję z innym argumentem
+                        
                         result += f"{func_name}({arg})"
                 else:
-                    # Nie jest to funkcja z argumentem
+                   
                     result += func_name
             else:
-                # Kopiujemy pozostałe znaki
+                
                 result += latex[i]
                 i += 1
         return result
 
-    # Zamiana \frac{d}{d \chi} f na f'
+ 
     def replace_derivative(latex):
         search_str = "\\frac{d}{d \\chi}"
         while search_str in latex:
             index = latex.find(search_str)
-            # Zakładamy, że po \frac{d}{d \chi} następuje spacja i zmienna
+            
             after = latex[index + len(search_str):]
-            # Znajdujemy koniec nazwy zmiennej
+           
             var_end = index + len(search_str)
             while var_end < len(latex) and (latex[var_end].isalpha() or latex[var_end] == '\\'):
                 var_end += 1
             var = latex[index + len(search_str):var_end].strip()
-            # Jeśli zmienna zaczyna się od '\', to jest to symbol LaTeX, np. \phi
+            
             if var.startswith('\\'):
                 var_name = ""
                 j = 0
@@ -191,13 +203,13 @@ def process_latex(latex_str):
                 var_replaced = f"{var_name}'"
             else:
                 var_replaced = f"{var}'"
-            # Zamieniamy \frac{d}{d \chi} f na f'
+          
             latex = latex[:index] + var_replaced + latex[var_end:]
         return latex
 
-    # Najpierw usuwamy argumenty funkcji
+    
     latex_str = remove_function_argument(latex_str)
-    # Następnie zamieniamy pochodne
+   
     latex_str = replace_derivative(latex_str)
 
     return latex_str
@@ -242,7 +254,7 @@ def wczytaj_metryke(filename):
                     if len(dat) == 3:
                         try:
                             i, j, expr = int(dat[0]), int(dat[1]), dat[2]
-                            # Tworzymy słownik symboli
+                           
                             symbols_dict = {str(sym): sym for sym in wspolrzedne + parametry}
                             metryka[(i, j)] = sp.sympify(expr, locals=symbols_dict)
                         except ValueError:
@@ -299,15 +311,15 @@ def oblicz_tensory(wspolrzedne, metryka):
     return g, Gamma, R_abcd, Ricci, Scalar_Curvature
 
 def compute_einstein_tensor(Ricci, Scalar_Curvature, g, g_inv, n):
-    G_lower = sp.zeros(n, n)  # G_{ij}
-    G_upper = sp.zeros(n, n)  # G^i_j
+    G_lower = sp.zeros(n, n)  
+    G_upper = sp.zeros(n, n) 
 
-    # Oblicz G_{ij} = R_{ij} - 1/2 g_{ij} R
+    
     for mu in range(n):
         for nu in range(n):
             G_lower[mu, nu] = custom_simplify(Ricci[mu, nu] - sp.Rational(1, 2) * g[mu, nu] * Scalar_Curvature)
 
-    # Oblicz G^i_j = g^{ik} G_{kj}
+
     for mu in range(n):
         for nu in range(n):
             sum_term = 0
@@ -324,8 +336,8 @@ def wyswietl_tensory(g, Gamma, R_abcd, Ricci, Scalar_Curvature, G_upper, G_lower
     write_ricci_components(Ricci, n)
     write_einstein_components(G_upper, G_lower, n)
     write_scalar_curvatre(Scalar_Curvature, n)
-    print("Skalarowa krzywizna R:")
-    sp.pprint(Scalar_Curvature)
+    # print("Curvature sclar R:")
+    # sp.pprint(Scalar_Curvature)
     print("")
 
 
