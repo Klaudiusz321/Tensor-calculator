@@ -36,13 +36,13 @@ def lower_indices(Riemann, g, n):
 
 def write_scalar_curvatre(scalar_curvature, n):
    
-    # Konwertuj wyrażenie SymPy do LaTeX
+    
     latex_str = sp.latex(scalar_curvature)
     
-    # Przetwarzaj LaTeX bez użycia 're'
+    
     cleaned_latex = process_latex(latex_str)
     
-    print("Skalarowa krzywizna R:")
+    print("Scalar curvature R:")
     print(f"$R = {cleaned_latex}$")
     print("Curvature sclar R:")
     sp.pprint(scalar_curvature)
@@ -51,14 +51,14 @@ def write_scalar_curvatre(scalar_curvature, n):
 def write_einstein_components(G_upper, G_lower, n):
     print("Non-zero Einstein tensor components (textual format and LaTeX):")
     
-    # G^i_j
+    
     for i in range(n):
         for j in range(n):
             val = custom_simplify(G_upper[i, j])
             if val != 0:
-                # Tekst
+                
                 print(f"G^({i})_({j}) = {val}")
-                # LaTeX
+               
                 latex_str = sp.latex(val)
                 print(f"G^{{{i}}}_{{{j}}} = {latex_str}")
     
@@ -67,9 +67,9 @@ def write_einstein_components(G_upper, G_lower, n):
         for j in range(n):
             val = custom_simplify(G_lower[i, j])
             if val != 0:
-                # Tekst
+               
                 print(f"G_({i}{j}) = {val}")
-                # LaTeX
+                
                 latex_str = sp.latex(val)
                 print(f"G_{{{i}{j}}} = {latex_str}")
 
@@ -85,6 +85,9 @@ def write_metric_components(g, n):
                 # LaTeX
                 latex_str = sp.latex(val)
                 print(f"g_{{{i}{j}}} = {latex_str}")
+                # Dodanie pustej linii
+                print()
+
 
 
 def write_christoffel_symbols(Gamma, n):
@@ -94,12 +97,15 @@ def write_christoffel_symbols(Gamma, n):
         val = Gamma[a][b][c]
         simplified_val = custom_simplify(val)
         if simplified_val != 0:
-            # Wyświetl tekstowy format
+            # Tekstowy format
             print(f"Γ^({a})_({b}{c}) = {simplified_val}")
             
-            # Generuj LaTeX
+            # Generowanie LaTeX
             latex_str = sp.latex(simplified_val)
             print(f"\\Gamma^{{{a}}}_{{{b}{c}}} = {latex_str}")
+            
+            # Dodanie pustej linii
+            print()
 
 
 def write_full_riemann_components(R_abcd, n):
@@ -114,7 +120,10 @@ def write_full_riemann_components(R_abcd, n):
             # Generowanie LaTeX
             latex_val = sp.latex(val)
             print(f"R_{{{a}{b}{c}{d}}} = {latex_val}")
-    print("")
+            
+            # Dodanie pustej linii
+            print()
+
 
 
 def write_ricci_components(Ricci, n):
@@ -129,7 +138,10 @@ def write_ricci_components(Ricci, n):
             # Generowanie LaTeX
             latex_val = sp.latex(val)
             print(f"R_{{{i}{j}}} = {latex_val}")
-    print("")
+            
+            # Dodanie pustej linii
+            print()
+
 
 
 def custom_simplify(expr):
@@ -358,7 +370,7 @@ if __name__ == "__main__":
         try:
             g_inv = g.inv()
         except Exception as e:
-            print("Błąd przy obliczaniu odwrotnej metryki:", e)
+            print("error:", e)
             exit(1)
         
         # Oblicz tensor Einsteina
