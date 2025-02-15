@@ -24,6 +24,15 @@ def generate_index_christoffel(n):
             for c in range(b, n):
                 index.append((a, b, c))
     return index
+def write_einstein_components_latex(G, n):
+    print(r"Non-zero Einstein Tensor Components ($G_{ij}$):")
+    for i in range(n):
+        for j in range(i, n):
+            val = custom_simplify(G[i, j])  # Simplify each component
+            if val != 0:
+                expr_latex = latex(val)  # Convert to LaTeX
+                print(rf"G_{{{i}{j}}} &= {expr_latex} \\\\")
+    print(r"\end{align*}")
 
 def lower_indices(Riemann, g, n):
     R_abcd = [[[[0 for _ in range(n)] for _ in range(n)] for _ in range(n)] for _ in range(n)]
@@ -34,6 +43,7 @@ def lower_indices(Riemann, g, n):
                     R_abcd[a][b][c][d] = sum(g[a, i] * Riemann[i][b][c][d] for i in range(n))
     return R_abcd
 
+<<<<<<< HEAD
 def write_scalar_curvatre(scalar_curvature, n):
    
     
@@ -110,10 +120,42 @@ def write_christoffel_symbols(Gamma, n):
 
 def write_full_riemann_components(R_abcd, n):
     print("Non-zero components of the Riemann tensor (textual format and LaTeX):")
+=======
+def write_einstein_components(G, n):
+    print("Non zero einstein tensor components (G_ij):")
+    for i in range(n):
+        for j in range(i,n):
+            val = G[i,j]
+            if val !=0:
+                print(f"G{{{i}{j}}} = {val}")
+    print("")
+
+def write_metric_components(g, n):
+    print("non zero metric tensor (g_{ij}):")
+    for i in range(n):
+        for j in range(i, n):
+            val = g[i, j]
+            if val != 0:
+                print(f"g_{i}{j} = {val}")
+    print("")
+
+def write_christoffel_symbols(Gamma, n):
+    print("Non zero Christoffela (Γ^a_{bc}):")
+    ch_index = generate_index_christoffel(n)
+    for (a, b, c) in ch_index:
+        val = Gamma[a][b][c]
+        if val != 0:
+            print(f"Γ^{a}_{{{b}{c}}} = {val}")
+    print("")
+
+def write_full_riemann_components(R_abcd, n):
+    print("Non zero Riemann (R_{abcd}):")
+>>>>>>> 4e0811047bac8be511ea2be8f04b9cf3687c08de
     riemann_index = generate_index_riemann(n)
     for (a, b, c, d) in riemann_index:
         val = R_abcd[a][b][c][d]
         if val != 0:
+<<<<<<< HEAD
             # Tekstowy format
             print(f"R_({a}{b}{c}{d}) = {val}")
             
@@ -128,10 +170,18 @@ def write_full_riemann_components(R_abcd, n):
 
 def write_ricci_components(Ricci, n):
     print("Non-zero components of the Ricci tensor (textual format and LaTeX):")
+=======
+            print(f"R_{a}{b}{c}{d} = {val}")
+    print("")
+
+def write_ricci_components(Ricci, n):
+    print("Non zero Ricci (R_{ij}):")
+>>>>>>> 4e0811047bac8be511ea2be8f04b9cf3687c08de
     ricci_index = generate_index_ricci(n)
     for (i, j) in ricci_index:
         val = Ricci[i, j]
         if val != 0:
+<<<<<<< HEAD
             # Tekstowy format
             print(f"R_({i}{j}) = {val}")
             
@@ -141,10 +191,16 @@ def write_ricci_components(Ricci, n):
             
             # Dodanie pustej linii
             print()
+=======
+            print(f"R_{{{i}{j}}} = {val}")
+    print("")
+
+>>>>>>> 4e0811047bac8be511ea2be8f04b9cf3687c08de
 
 
 
 def custom_simplify(expr):
+<<<<<<< HEAD
     from sympy import simplify, factor, expand, trigsimp, cancel, ratsimp
     
     expr_simpl = expand(expr)
@@ -227,6 +283,24 @@ def process_latex(latex_str):
     return latex_str
 
 def wczytaj_metryke(filename):
+=======
+    from sympy import simplify, factor, expand, expand_trig, expand_log, trigsimp
+
+    expr_simpl = expand(expr)
+    expr_simpl = expand_trig(expr_simpl)
+    expr_simpl = expand_log(expr_simpl)
+
+
+    expr_simpl = trigsimp(expr_simpl)
+    expr_simpl = factor(expr_simpl)
+    expr_simpl = simplify(expr_simpl)
+
+    return expr_simpl
+
+
+def wczytaj_metryke(filename):
+
+>>>>>>> 4e0811047bac8be511ea2be8f04b9cf3687c08de
     symbol_assumptions = {
         'a':    dict(real=True, positive=True),
         'tau':  dict(real=True),
@@ -266,7 +340,11 @@ def wczytaj_metryke(filename):
                     if len(dat) == 3:
                         try:
                             i, j, expr = int(dat[0]), int(dat[1]), dat[2]
+<<<<<<< HEAD
                            
+=======
+                            # Tworzymy słownik symboli
+>>>>>>> 4e0811047bac8be511ea2be8f04b9cf3687c08de
                             symbols_dict = {str(sym): sym for sym in wspolrzedne + parametry}
                             metryka[(i, j)] = sp.sympify(expr, locals=symbols_dict)
                         except ValueError:
@@ -278,6 +356,11 @@ def wczytaj_metryke(filename):
 
     return wspolrzedne, parametry, metryka
 
+<<<<<<< HEAD
+=======
+
+
+>>>>>>> 4e0811047bac8be511ea2be8f04b9cf3687c08de
 def oblicz_tensory(wspolrzedne, metryka):
     n = len(wspolrzedne)
 
@@ -314,6 +397,7 @@ def oblicz_tensory(wspolrzedne, metryka):
     Ricci = sp.zeros(n, n)
     for mu in range(n):
         for nu in range(n):
+<<<<<<< HEAD
             Ricci[mu, nu] = custom_simplify(sum(Riemann[rho][mu][rho][nu] for rho in range(n)))
             Ricci[mu, nu] = custom_simplify(Ricci[mu, nu])
 
@@ -352,9 +436,96 @@ def wyswietl_tensory(g, Gamma, R_abcd, Ricci, Scalar_Curvature, G_upper, G_lower
     # sp.pprint(Scalar_Curvature)
     print("")
 
+=======
+            Ricci[mu, nu] = sum(Riemann[rho][mu][rho][nu] for rho in range(n))
+            Ricci[mu, nu] = custom_simplify(Ricci[mu, nu])
+
+
+    Scalar_Curvature = sum(g_inv[mu, nu] * Ricci[mu, nu] for mu in range(n) for nu in range(n))
+    Scalar_Curvature = custom_simplify(Scalar_Curvature)
+
+    return g, Gamma, R_abcd, Ricci, Scalar_Curvature
+
+
+# def write_full_riemann_components_latex(R_abcd, n):
+#     riemann_index = generate_index_riemann(n)
+#     print(r"\begin{align*}")
+#     for (a, b, c, d) in riemann_index:
+#         val = R_abcd[a][b][c][d]
+#         if val != 0:
+#             expr_latex = latex(val)
+#             print(rf"R_{{{a}{b}{c}{d}}} &= {expr_latex} \\\\")
+#     print(r"\end{align*}")
+
+def compute_einstein_tensor(Ricci, Scalar_Curvature, g, n):
+    G = sp.zeros(n,n)
+    for mu in range(n):
+        for nu in range(n):
+            G[mu, nu] = Ricci[mu, nu] - sp.Rational(1, 2)*g[mu, nu]* Scalar_Curvature
+            G[mu, nu] = custom_simplify(G[mu, nu])
+    return G
+
+# def write_ricci_components_latex(Ricci, n):
+#     ricci_index = generate_index_ricci(n)
+#     print(r"\begin{align*}")
+#     for (i, j) in ricci_index:
+#         val = Ricci[i, j]
+#         if val != 0:
+#             expr_latex = latex(val)
+#             print(rf"R_{{{i}{j}}} &= {expr_latex} \\\\")
+#     print(r"\end{align*}")
+
+def write_christoffel_symbols_latex(Gamma, n):
+    ch_index = generate_index_christoffel(n)
+    print(r"\begin{align*}")
+    for (a, b, c) in ch_index:
+        val = Gamma[a][b][c]
+        if val != 0:
+            expr_latex = latex(val)
+            print(rf"\Gamma^{{{a}}}_{{{b}{c}}} &= {expr_latex} \\\\")
+    print(r"\end{align*}")
+
+def write_scalar_curvature_latex(Scalar_Curvature):
+    scalar_latex = latex(Scalar_Curvature)
+    print(r"\begin{equation*}")
+    print(rf"R = {scalar_latex}")
+    print(r"\end{equation*}")
+
+
+
+
+def wyswietl_tensory(g, Gamma, R_abcd, Ricci, Scalar_Curvature,G, n):
+    write_metric_components(g, n)
+    write_christoffel_symbols(Gamma, n)
+    write_full_riemann_components(R_abcd, n)
+    write_ricci_components(Ricci, n)
+    write_einstein_components(G, n)
+>>>>>>> 4e0811047bac8be511ea2be8f04b9cf3687c08de
 
 if __name__ == "__main__":
 
+<<<<<<< HEAD
+=======
+    # print("\n--- LaTeX Code for Christoffel Symbols ---")
+    # write_christoffel_symbols_latex(Gamma, n)
+
+    # print("\n--- LaTeX Code for Riemann Tensor ---")
+    # write_full_riemann_components_latex(R_abcd, n)
+    #
+    # print("\n--- LaTeX Code for Ricci Tensor ---")
+    # write_ricci_components_latex(Ricci, n)
+
+    # print("\n--- LaTeX Code for Scalar Curvature ---")
+    # write_scalar_curvature_latex(Scalar_Curvature)
+    # print("")
+
+
+
+
+
+if __name__ == "__main__":
+
+>>>>>>> 4e0811047bac8be511ea2be8f04b9cf3687c08de
     filename = r"C:\Users\sorak\Desktop\metric.txt"
 
     wspolrzedne, parametry, metryka = wczytaj_metryke(filename)
