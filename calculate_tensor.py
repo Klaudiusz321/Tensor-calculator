@@ -1,6 +1,11 @@
 import sympy as sp
 import numpy as np
 import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D  # Opcjonalnie, zależnie od wersji matplotlib
+
+# Funkcja pomocnicza do obsługi obiektów typu Derivative
+def my_derivative(f, *symbols):
+    return f.diff(*symbols)
 
 def generate_index_riemann(n):
     index = []
@@ -37,44 +42,31 @@ def lower_indices(Riemann, g, n):
     return R_abcd
 
 def write_scalar_curvatre(scalar_curvature, n):
-   
-    
     latex_str = sp.latex(scalar_curvature)
-    
-    
     cleaned_latex = process_latex(latex_str)
-    
     print("Scalar curvature R:")
     print(f"$R = {cleaned_latex}$")
-    print("Curvature sclar R:")
+    print("Curvature scalar R:")
     sp.pprint(scalar_curvature)
     print("")
 
 def write_einstein_components(G_upper, G_lower, n):
     print("Non-zero Einstein tensor components (textual format and LaTeX):")
-    
-    
     for i in range(n):
         for j in range(n):
             val = custom_simplify(G_upper[i, j])
             if val != 0:
-                
                 print(f"G^({i})_({j}) = {val}")
-               
                 latex_str = sp.latex(val)
                 print(f"G^{{{i}}}_{{{j}}} = {latex_str}")
-    
     print("\nNon-zero Einstein tensor components (G_ij):")
     for i in range(n):
         for j in range(n):
             val = custom_simplify(G_lower[i, j])
             if val != 0:
-               
                 print(f"G_({i}{j}) = {val}")
-                
                 latex_str = sp.latex(val)
                 print(f"G_{{{i}{j}}} = {latex_str}")
-
 
 def write_metric_components(g, n):
     print("Metric tensor components (textual format and LaTeX):")
@@ -82,15 +74,10 @@ def write_metric_components(g, n):
         for j in range(i, n):
             val = custom_simplify(g[i, j])
             if val != 0:
-                # Tekst
                 print(f"g_({i}{j}) = {val}")
-                # LaTeX
                 latex_str = sp.latex(val)
                 print(f"g_{{{i}{j}}} = {latex_str}")
-                # Dodanie pustej linii
                 print()
-
-
 
 def write_christoffel_symbols(Gamma, n):
     print("Non-zero Christoffel symbols (textual format and LaTeX):")
@@ -99,16 +86,10 @@ def write_christoffel_symbols(Gamma, n):
         val = Gamma[a][b][c]
         simplified_val = custom_simplify(val)
         if simplified_val != 0:
-            # Tekstowy format
             print(f"Γ^({a})_({b}{c}) = {simplified_val}")
-            
-            # Generowanie LaTeX
             latex_str = sp.latex(simplified_val)
             print(f"\\Gamma^{{{a}}}_{{{b}{c}}} = {latex_str}")
-            
-            # Dodanie pustej linii
             print()
-
 
 def write_full_riemann_components(R_abcd, n):
     print("Non-zero components of the Riemann tensor (textual format and LaTeX):")
@@ -116,17 +97,10 @@ def write_full_riemann_components(R_abcd, n):
     for (a, b, c, d) in riemann_index:
         val = R_abcd[a][b][c][d]
         if val != 0:
-            # Tekstowy format
             print(f"R_({a}{b}{c}{d}) = {val}")
-            
-            # Generowanie LaTeX
             latex_val = sp.latex(val)
             print(f"R_{{{a}{b}{c}{d}}} = {latex_val}")
-            
-            # Dodanie pustej linii
             print()
-
-
 
 def write_ricci_components(Ricci, n):
     print("Non-zero components of the Ricci tensor (textual format and LaTeX):")
@@ -134,31 +108,22 @@ def write_ricci_components(Ricci, n):
     for (i, j) in ricci_index:
         val = Ricci[i, j]
         if val != 0:
-            # Tekstowy format
             print(f"R_({i}{j}) = {val}")
-            
-            # Generowanie LaTeX
             latex_val = sp.latex(val)
             print(f"R_{{{i}{j}}} = {latex_val}")
-            
-            # Dodanie pustej linii
             print()
-
-
 
 def custom_simplify(expr):
     from sympy import simplify, factor, expand, trigsimp, cancel, ratsimp
-    
     expr_simpl = expand(expr)
     expr_simpl = trigsimp(expr_simpl)
     expr_simpl = factor(expr_simpl)
     expr_simpl = simplify(expr_simpl)
     expr_simpl = cancel(expr_simpl)
     expr_simpl = ratsimp(expr_simpl)
-    
     return expr_simpl
+
 def process_latex(latex_str):
-   
     def remove_function_argument(latex):
         result = ""
         i = 0
@@ -168,7 +133,6 @@ def process_latex(latex_str):
                 while i < len(latex) and latex[i].isalpha():
                     i += 1
                 func_name = latex[start:i]
-                
                 if i < len(latex) and latex[i] == '(':
                     i += 1  
                     arg_start = i
@@ -181,33 +145,25 @@ def process_latex(latex_str):
                         i += 1
                     arg = latex[arg_start:i-1].strip()
                     if arg in ['\\chi', 'chi']:
-                       
                         result += func_name
                     else:
-                        
                         result += f"{func_name}({arg})"
                 else:
-                   
                     result += func_name
             else:
-                
                 result += latex[i]
                 i += 1
         return result
 
- 
     def replace_derivative(latex):
         search_str = "\\frac{d}{d \\chi}"
         while search_str in latex:
             index = latex.find(search_str)
-            
             after = latex[index + len(search_str):]
-           
             var_end = index + len(search_str)
             while var_end < len(latex) and (latex[var_end].isalpha() or latex[var_end] == '\\'):
                 var_end += 1
             var = latex[index + len(search_str):var_end].strip()
-            
             if var.startswith('\\'):
                 var_name = ""
                 j = 0
@@ -217,15 +173,11 @@ def process_latex(latex_str):
                 var_replaced = f"{var_name}'"
             else:
                 var_replaced = f"{var}'"
-          
             latex = latex[:index] + var_replaced + latex[var_end:]
         return latex
 
-    
     latex_str = remove_function_argument(latex_str)
-   
     latex_str = replace_derivative(latex_str)
-
     return latex_str
 
 def wczytaj_metryke(filename):
@@ -253,12 +205,10 @@ def wczytaj_metryke(filename):
                 line = line.split('#')[0].strip()
                 if not line:
                     continue
-
                 if ';' in line:
                     wsp_, prm_ = line.split(';')
                     wsp_strs = [sym.strip() for sym in wsp_.split(',') if sym.strip()]
                     wspolrzedne = [create_symbol(s) for s in wsp_strs]
-
                     prm_ = prm_.strip()
                     if prm_:
                         par_strs = [sym.strip() for sym in prm_.split(',') if sym.strip()]
@@ -268,7 +218,6 @@ def wczytaj_metryke(filename):
                     if len(dat) == 3:
                         try:
                             i, j, expr = int(dat[0]), int(dat[1]), dat[2]
-                           
                             symbols_dict = {str(sym): sym for sym in wspolrzedne + parametry}
                             metryka[(i, j)] = sp.sympify(expr, locals=symbols_dict)
                         except ValueError:
@@ -282,7 +231,6 @@ def wczytaj_metryke(filename):
 
 def oblicz_tensory(wspolrzedne, metryka):
     n = len(wspolrzedne)
-
     g = sp.Matrix(n, n, lambda i, j: metryka.get((i, j), metryka.get((j, i), 0)))
     g_inv = g.inv()
 
@@ -307,8 +255,8 @@ def oblicz_tensory(wspolrzedne, metryka):
                     term2 = sp.diff(Gamma[rho][mu][sigma], wspolrzedne[nu])
                     sum_term = 0
                     for lam in range(n):
-                        sum_term += (Gamma[rho][mu][lam] * Gamma[lam][nu][sigma]
-                                     - Gamma[rho][nu][lam] * Gamma[lam][mu][sigma])
+                        sum_term += (Gamma[rho][mu][lam] * Gamma[lam][nu][sigma] -
+                                     Gamma[rho][nu][lam] * Gamma[lam][mu][sigma])
                     Riemann[rho][sigma][mu][nu] = custom_simplify(term1 - term2 + sum_term)
 
     R_abcd = lower_indices(Riemann, g, n)
@@ -325,22 +273,17 @@ def oblicz_tensory(wspolrzedne, metryka):
     return g, Gamma, R_abcd, Ricci, Scalar_Curvature
 
 def compute_einstein_tensor(Ricci, Scalar_Curvature, g, g_inv, n):
-    G_lower = sp.zeros(n, n)  
-    G_upper = sp.zeros(n, n) 
-
-    
+    G_lower = sp.zeros(n, n)
+    G_upper = sp.zeros(n, n)
     for mu in range(n):
         for nu in range(n):
             G_lower[mu, nu] = custom_simplify(Ricci[mu, nu] - sp.Rational(1, 2) * g[mu, nu] * Scalar_Curvature)
-
-
     for mu in range(n):
         for nu in range(n):
             sum_term = 0
             for alpha in range(n):
                 sum_term += g_inv[mu, alpha] * G_lower[alpha, nu]
             G_upper[mu, nu] = custom_simplify(sum_term)
-
     return G_upper, G_lower
 
 def wyswietl_tensory(g, Gamma, R_abcd, Ricci, Scalar_Curvature, G_upper, G_lower, n):
@@ -350,15 +293,10 @@ def wyswietl_tensory(g, Gamma, R_abcd, Ricci, Scalar_Curvature, G_upper, G_lower
     write_ricci_components(Ricci, n)
     write_einstein_components(G_upper, G_lower, n)
     write_scalar_curvatre(Scalar_Curvature, n)
-    # print("Curvature sclar R:")
-    # sp.pprint(Scalar_Curvature)
     print("")
 
-
 if __name__ == "__main__":
-
     filename = r"C:\Users\sorak\Desktop\metric.txt"
-
     wspolrzedne, parametry, metryka = wczytaj_metryke(filename)
     print("Coordinates:", wspolrzedne)
     print("Parameters:", parametry)
@@ -367,49 +305,56 @@ if __name__ == "__main__":
 
     if wspolrzedne and metryka:
         g, Gamma, R_abcd, Ricci, Scalar_Curvature = oblicz_tensory(wspolrzedne, metryka)
-        
-        # Oblicz odwrotną metrykę
         try:
             g_inv = g.inv()
         except Exception as e:
             print("error:", e)
             exit(1)
-        
-        # Oblicz tensor Einsteina
         G_upper, G_lower = compute_einstein_tensor(Ricci, Scalar_Curvature, g, g_inv, len(wspolrzedne))
-        
-        # Wyświetl wszystkie tensory
         wyswietl_tensory(g, Gamma, R_abcd, Ricci, Scalar_Curvature, G_upper, G_lower, len(wspolrzedne))
+        
+        # === Generacja wykresu 3D skalarnej krzywizny ===
+        if len(wspolrzedne) >= 2:
+            var1 = wspolrzedne[0]
+            var2 = wspolrzedne[1]
+            fixed_subs = {w: 0 for w in wspolrzedne[2:]} if len(wspolrzedne) > 2 else {}
 
-x, y = sp.symbols('x y')
+            # Podstawiamy stałe i próbujemy wymusić obliczenie pochodnych
+            scalar_curvature_expr = Scalar_Curvature.subs(fixed_subs).doit()
+            # Zamieniamy pozostałe obiekty Derivative na obliczone wartości
+            scalar_curvature_expr = scalar_curvature_expr.replace(sp.Derivative, lambda f, *symbols: f.diff(*symbols))
+            
+            try:
+                scalar_curvature_func = sp.lambdify(
+                    (var1, var2),
+                    scalar_curvature_expr,
+                    modules=[{'Derivative': my_derivative}, 'numpy']
+                )
+            except Exception as e:
+                print("Błąd przy lambdify:", e)
+                exit(1)
+            
+            x_vals = np.linspace(-10, 10, 200)
+            y_vals = np.linspace(-10, 10, 200)
+            X, Y = np.meshgrid(x_vals, y_vals)
+            Z = scalar_curvature_func(X, Y)
+            
+            fig = plt.figure(figsize=(10, 7))
+            ax = fig.add_subplot(111, projection='3d')
+            surf = ax.plot_surface(X, Y, Z, cmap='viridis', edgecolor='none', alpha=0.8)
+            fig.colorbar(surf, ax=ax, shrink=0.5, aspect=5, label='Skalarna krzywizna')
+            
+            ax.set_xlabel(f'{sp.latex(var1)}')
+            ax.set_ylabel(f'{sp.latex(var2)}')
+            ax.set_zlabel('R')
+            ax.set_title('3D wykres skalarnej krzywizny')
+            
+            plt.show()
+        else:
+            print("Do wyświetlenia wykresu 3D potrzeba co najmniej dwóch współrzędnych.")
 
-# Przykładowe wyrażenie na skalarne zagięcie przestrzeni (skalarną krzywiznę)
-# W praktyce zastąp to wyrażeniem obliczonym przez Twój program lub pochodzącym z metryki
-Scalar_Curvature = sp.sin(sp.sqrt(x**2 + y**2)) / sp.sqrt(x**2 + y**2)
+# Najpierw podstawiamy stałe wartości i próbujemy wymusić obliczenie pochodnych
+scalar_curvature_expr = Scalar_Curvature.subs(fixed_subs).doit()
 
-# Konwersja wyrażenia symbolicznego na funkcję numeryczną za pomocą lambdify
-R_func = sp.lambdify((x, y), Scalar_Curvature, modules='numpy')
-
-# Definiujemy zakresy dla x i y (dostosuj do swoich potrzeb lub metryki)
-x_vals = np.linspace(-10, 10, 400)
-y_vals = np.linspace(-10, 10, 400)
-X, Y = np.meshgrid(x_vals, y_vals)
-
-# Obliczamy wartość funkcji na siatce punktów
-Z = R_func(X, Y)
-
-# Wizualizacja wykresu 3D
-fig = plt.figure(figsize=(10, 8))
-ax = fig.add_subplot(111, projection='3d')
-surface = ax.plot_surface(X, Y, Z, cmap='viridis', edgecolor='none')
-
-# Etykiety osi i tytuł wykresu
-ax.set_xlabel('x')
-ax.set_ylabel('y')
-ax.set_zlabel('z (skal. krzywizna)')
-ax.set_title('Wizualizacja zagięcia przestrzeni')
-
-# Pasek kolorów (opcjonalnie)
-fig.colorbar(surface, shrink=0.5, aspect=5)
-
-plt.show()
+# Następnie zamieniamy wszystkie pozostałe obiekty Derivative na ich obliczenia
+scalar_curvature_expr = scalar_curvature_expr.replace(sp.Derivative, lambda f, *symbols: f.diff(*symbols))
