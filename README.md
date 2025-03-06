@@ -1,5 +1,6 @@
 Scalar Curvature Calculator
 This repository contains a pure Python implementation designed for calculating scalar curvature based on user-defined metrics. The project was developed as part of an engineering thesis and focuses on symbolic tensor computations using the Sympy library.
+![Uploading screencapture-itensor-online-2025-03-06-16_39_32.png…]()
 
 Overview
 The Scalar Curvature Calculator is a command-line tool that accepts a metric in a simple text format and computes various tensor quantities, including:
