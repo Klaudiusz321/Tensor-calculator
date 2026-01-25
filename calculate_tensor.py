@@ -233,7 +233,7 @@ def wyswietl_tensory(g, Gamma, R_abcd, Ricci, Scalar_Curvature,G, n):
 
 if __name__ == "__main__":
 
-    filename = r"C:\Users\sorak\Desktop\metric.txt"
+    filename = "metric.txt"
 
 
     wspolrzedne, parametry, metryka = wczytaj_metryke(filename)
