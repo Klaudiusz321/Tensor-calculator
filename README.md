@@ -1,32 +1,32 @@
-# Tensor Calculator - Kalkulator Tensorów dla Ogólnej Teorii Względności
+# Tensor Calculator for General Relativity
 
-## 📖 Opis projektu
+## 📖 Project Description
 
-Program służy do obliczania kluczowych obiektów geometrycznych używanych w **Ogólnej Teorii Względności (OTW)**. Na podstawie zadanej metryki czasoprzestrzeni, program automatycznie oblicza:
+This program calculates key geometric objects used in **General Relativity (GR)**. Based on a given spacetime metric, the program automatically computes:
 
-- **Tensor metryczny** $g_{\mu\nu}$
-- **Symbole Christoffela** $\Gamma^\sigma_{\mu\nu}$
-- **Tensor Riemanna** $R_{\rho\sigma\mu\nu}$
-- **Tensor Ricciego** $R_{\mu\nu}$
-- **Skalar krzywizny (skalar Ricciego)** $R$
-- **Tensor Einsteina** $G_{\mu\nu}$
+- **Metric tensor** $g_{\mu\nu}$
+- **Christoffel symbols** $\Gamma^\sigma_{\mu\nu}$
+- **Riemann tensor** $R_{\rho\sigma\mu\nu}$
+- **Ricci tensor** $R_{\mu\nu}$
+- **Scalar curvature (Ricci scalar)** $R$
+- **Einstein tensor** $G_{\mu\nu}$
 
-Te wielkości są fundamentalne w opisie zakrzywienia czasoprzestrzeni i stanowią podstawę równań pola Einsteina.
+These quantities are fundamental in describing spacetime curvature and form the basis of Einstein's field equations.
 
 ---
 
-## 🛠️ Wymagania
+## 🛠️ Requirements
 
 - **Python 3.x**
-- Biblioteka **SymPy** (obliczenia symboliczne)
+- **SymPy** library (symbolic computation)
 
-### Instalacja wymaganych pakietów
+### Installing required packages
 
 ```bash
 pip install -r requirements.txt
 ```
 
-lub ręcznie:
+or manually:
 
 ```bash
 pip install sympy
@@ -34,67 +34,65 @@ pip install sympy
 
 ---
 
-## 📂 Struktura projektu
+## 📂 Project Structure
 
 ```
 Tensor-calculator/
-├── calculate_tensor.py   # Główny plik programu
-├── energy_tensor.py      # Moduł pomocniczy (rozszerzenie)
-├── metric.txt            # Przykładowy plik z metryką Schwarzschilda
-└── README.md             # Dokumentacja
+├── calculate_tensor.py   # Main program file
+├── energy_tensor.py      # Helper module (extension)
+├── metric.txt            # Example metric file (Schwarzschild)
+└── README.md             # Documentation
 ```
 
 ---
 
-## 🚀 Instrukcja uruchomienia
+## 🚀 Getting Started
 
-### Krok 1: Przygotuj plik z metryką
+### Step 1: Prepare the metric file
 
-W repozytorium znajduje się przykładowy plik `metric.txt` z metryką Schwarzschilda (czarna dziura). Możesz go użyć bezpośrednio lub zmodyfikować.
+The repository includes an example `metric.txt` file with the Schwarzschild metric (black hole). You can use it directly or modify it.
 
-#### Format pliku metryki:
+#### Metric file format:
 
 ```
-# Komentarze zaczynają się od #
+# Comments start with #
 
-# Pierwsza linia (bez komentarza): współrzędne ; parametry
+# First line (without comment): coordinates ; parameters
 t, r, theta, phi ; M
 
-# Elementy tensora metrycznego: indeks_i indeks_j wyrażenie
+# Metric tensor elements: index_i index_j expression
 0 0 -(1 - 2*M/r)
 1 1 1/(1 - 2*M/r)
 2 2 r**2
 3 3 r**2 * sin(theta)**2
 ```
 
-#### Zasady formatu:
+#### Format rules:
 
-| Element | Opis | Przykład |
-|---------|------|----------|
-| **Współrzędne** | Nazwy zmiennych oddzielone przecinkami | `t, r, theta, phi` |
-| **Separator** | Średnik `;` oddziela współrzędne od parametrów | `;` |
-| **Parametry** | Stałe używane w metryce (opcjonalne) | `M, a, Lambda` |
-| **Elementy metryki** | `i j wyrażenie` - indeksy od 0 | `0 0 -1` |
-| **Komentarze** | Linie zaczynające się od `#` | `# to jest komentarz` |
+| Element | Description | Example |
+|---------|-------------|---------|
+| **Coordinates** | Variable names separated by commas | `t, r, theta, phi` |
+| **Separator** | Semicolon `;` separates coordinates from parameters | `;` |
+| **Parameters** | Constants used in the metric (optional) | `M, a, Lambda` |
+| **Metric elements** | `i j expression` - indices start from 0 | `0 0 -1` |
+| **Comments** | Lines starting with `#` | `# this is a comment` |
 
-#### Dostępne funkcje matematyczne:
-- `sin(x)`, `cos(x)`, `tan(x)` - funkcje trygonometryczne
-- `exp(x)` - funkcja wykładnicza
-- `sqrt(x)` - pierwiastek kwadratowy
-- `**` - potęgowanie (np. `r**2`)
-- `log(x)` - logarytm naturalny
+#### Available mathematical functions:
+- `sin(x)`, `cos(x)`, `tan(x)` - trigonometric functions
+- `exp(x)` - exponential function
+- `sqrt(x)` - square root
+- `**` - exponentiation (e.g., `r**2`)
+- `log(x)` - natural logarithm
 
-### Krok 2: Ustaw ścieżkę do pliku metryki
+### Step 2: Set the metric file path
 
-W pliku `calculate_tensor.py` zmień ścieżkę do pliku metryki:
+In `calculate_tensor.py`, change the metric file path if needed:
 
 ```python
-filename = r"C:\Users\sorak\Desktop\Tensor-calculator\metric.txt"
+filename = "metric.txt"
 ```
 
-Na ścieżkę do Twojego pliku z metryką.
-
-### Krok 3: Uruchom program
+### Step 3: Run the program
 
 ```bash
 python calculate_tensor.py
@@ -102,75 +100,75 @@ python calculate_tensor.py
 
 ---
 
-## 📊 Przykładowe wyjście
+## 📊 Example Output
 
-Program wyświetli:
-1. Wczytane współrzędne i parametry
-2. Niezerowe komponenty tensora metrycznego
-3. Niezerowe symbole Christoffela
-4. Niezerowe komponenty tensora Riemanna
-5. Niezerowe komponenty tensora Ricciego
-6. Niezerowe komponenty tensora Einsteina
-7. Skalar krzywizny
+The program will display:
+1. Loaded coordinates and parameters
+2. Non-zero metric tensor components
+3. Non-zero Christoffel symbols
+4. Non-zero Riemann tensor components
+5. Non-zero Ricci tensor components
+6. Non-zero Einstein tensor components
+7. Scalar curvature
 
 ---
 
-## 🔬 Jak działa program - szczegółowy opis algorytmu
+## 🔬 How It Works - Algorithm Details
 
-### 1. Wczytywanie metryki (`wczytaj_metryke`)
+### 1. Loading the metric (`load_metric`)
 
-Funkcja parsuje plik tekstowy i:
-- Tworzy symbole SymPy dla współrzędnych (np. $\tau, \psi, \theta, \phi$)
-- Tworzy symbole dla parametrów (np. $a$ - promień wszechświata)
-- Buduje słownik elementów metryki
+The function parses the text file and:
+- Creates SymPy symbols for coordinates (e.g., $\tau, \psi, \theta, \phi$)
+- Creates symbols for parameters (e.g., $a$ - scale factor)
+- Builds a dictionary of metric elements
 
-### 2. Obliczanie tensorów (`oblicz_tensory`)
+### 2. Computing tensors (`compute_tensors`)
 
-#### a) Tensor metryczny $g_{\mu\nu}$
-Macierz symetryczna opisująca geometrię czasoprzestrzeni.
+#### a) Metric tensor $g_{\mu\nu}$
+A symmetric matrix describing the geometry of spacetime.
 
-#### b) Symbole Christoffela (symbole połączenia)
-Obliczane ze wzoru:
+#### b) Christoffel symbols (connection coefficients)
+Computed using the formula:
 
 $$\Gamma^\sigma_{\mu\nu} = \frac{1}{2} g^{\sigma\lambda} \left( \partial_\mu g_{\nu\lambda} + \partial_\nu g_{\mu\lambda} - \partial_\lambda g_{\mu\nu} \right)$$
 
-Symbole Christoffela opisują jak wektory zmieniają się przy transporcie równoległym.
+Christoffel symbols describe how vectors change during parallel transport.
 
-#### c) Tensor Riemanna
-Miara krzywizny czasoprzestrzeni:
+#### c) Riemann tensor
+A measure of spacetime curvature:
 
 $$R^\rho{}_{\sigma\mu\nu} = \partial_\mu \Gamma^\rho_{\nu\sigma} - \partial_\nu \Gamma^\rho_{\mu\sigma} + \Gamma^\rho_{\mu\lambda}\Gamma^\lambda_{\nu\sigma} - \Gamma^\rho_{\nu\lambda}\Gamma^\lambda_{\mu\sigma}$$
 
-#### d) Tensor Ricciego
-Kontrakcja tensora Riemanna:
+#### d) Ricci tensor
+Contraction of the Riemann tensor:
 
 $$R_{\mu\nu} = R^\rho{}_{\mu\rho\nu}$$
 
-#### e) Skalar krzywizny
-Kontrakcja tensora Ricciego:
+#### e) Scalar curvature
+Contraction of the Ricci tensor:
 
 $$R = g^{\mu\nu} R_{\mu\nu}$$
 
-#### f) Tensor Einsteina
-Występuje w równaniach pola Einsteina:
+#### f) Einstein tensor
+Appears in Einstein's field equations:
 
 $$G_{\mu\nu} = R_{\mu\nu} - \frac{1}{2} g_{\mu\nu} R$$
 
-### 3. Upraszczanie wyrażeń (`custom_simplify`)
+### 3. Expression simplification (`custom_simplify`)
 
-Program stosuje wieloetapowe upraszczanie symboliczne:
-- `expand` - rozwinięcie wyrażeń
-- `trigsimp` - uproszczenia trygonometryczne
-- `factor` - faktoryzacja
-- `simplify` - ogólne uproszczenie
-- `cancel` - redukcja ułamków
-- `ratsimp` - uproszczenie wyrażeń wymiernych
+The program applies multi-step symbolic simplification:
+- `expand` - expression expansion
+- `trigsimp` - trigonometric simplification
+- `factor` - factorization
+- `simplify` - general simplification
+- `cancel` - fraction reduction
+- `ratsimp` - rational expression simplification
 
 ---
 
-## 📐 Przykłady metryk
+## 📐 Metric Examples
 
-### Metryka Minkowskiego (płaska czasoprzestrzeń)
+### Minkowski metric (flat spacetime)
 ```
 t, x, y, z ;
 0 0 -1
@@ -179,7 +177,7 @@ t, x, y, z ;
 3 3 1
 ```
 
-### Metryka Schwarzschilda (czarna dziura)
+### Schwarzschild metric (black hole)
 ```
 t, r, theta, phi ; M
 0 0 -(1 - 2*M/r)
@@ -188,7 +186,7 @@ t, r, theta, phi ; M
 3 3 r**2 * sin(theta)**2
 ```
 
-### Metryka FLRW (kosmologia)
+### FLRW metric (cosmology)
 ```
 t, r, theta, phi ; a
 0 0 -1
@@ -199,22 +197,22 @@ t, r, theta, phi ; a
 
 ---
 
-## ⚠️ Uwagi
+## ⚠️ Notes
 
-- Obliczenia symboliczne mogą być czasochłonne dla złożonych metryk
-- Upewnij się, że metryka jest poprawnie zdefiniowana (symetryczna, nieosobliwa)
-- Indeksowanie zaczyna się od 0
-
----
-
-## 👨‍💻 Autor
-
-Projekt wykonany w ramach kursu Python na studiach.
+- Symbolic computations may be time-consuming for complex metrics
+- Ensure the metric is properly defined (symmetric, non-singular)
+- Indexing starts from 0
 
 ---
 
-## 📚 Bibliografia
+## 👨‍💻 Author
+
+Project created as part of a Python course at university.
+
+---
+
+## 📚 References
 
 1. Carroll, S. M. - "Spacetime and Geometry: An Introduction to General Relativity"
 2. Misner, Thorne, Wheeler - "Gravitation"
-3. Dokumentacja SymPy: https://docs.sympy.org/
+3. SymPy Documentation: https://docs.sympy.org/

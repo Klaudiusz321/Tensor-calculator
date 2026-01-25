@@ -1,22 +1,22 @@
 # ===========================================
-# Przykładowa metryka: Metryka Schwarzschilda
-# Opisuje czasoprzestrzeń wokół nierorotującej czarnej dziury
+# Example metric: Schwarzschild Metric
+# Describes spacetime around a non-rotating black hole
 # ===========================================
 
-# Format: współrzędne ; parametry
+# Format: coordinates ; parameters
 t, r, theta, phi ; M
 
-# Elementy tensora metrycznego g_ij
-# Format: indeks_i indeks_j wyrażenie
+# Metric tensor elements g_ij
+# Format: index_i index_j expression
 
-# g_00 = -(1 - 2M/r) - składowa czasowa
+# g_00 = -(1 - 2M/r) - time component
 0 0 -(1 - 2*M/r)
 
-# g_11 = 1/(1 - 2M/r) - składowa radialna
+# g_11 = 1/(1 - 2M/r) - radial component
 1 1 1/(1 - 2*M/r)
 
-# g_22 = r^2 - składowa theta
+# g_22 = r^2 - theta component
 2 2 r**2
 
-# g_33 = r^2 * sin^2(theta) - składowa phi
+# g_33 = r^2 * sin^2(theta) - phi component
 3 3 r**2 * sin(theta)**2
